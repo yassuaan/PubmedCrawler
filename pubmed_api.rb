@@ -5,6 +5,8 @@ require 'open-uri'
 require 'rubygems'
 require './api_access/reqlist.rb'
 
+require './model/record.rb'
+
 class PubmedCrawler
   RET_MAX = 20
   attr_accessor :keyword ,:retmax
@@ -31,15 +33,39 @@ class PubmedCrawler
     return details
   end
   
+  def structure_from_detail(result)
+      result.create_detail
+      res = result.detail
+      authors = []
+      tmp = [res[:AuthorList]].flatten # return hash when only one author (want to return array)
+      tmp.each{|a| authors << a[:Author] }
+      publish = res[:PubDate]
+      if publish == nil
+        publish = 'no information'
+      end  
+#      Article.create({:pubmed_id => res[:Id], :title => res[:Title], :author => authors.join(', '), :publish => res[:EPubDate]}) 
+      response = {:pubmed_id => res[:Id], :title => res[:Title], :author => authors.join(', '), :publish => publish}
+    
+    return response
+  end
+  
   def crawl
     while 1
       datalist = self.do
       
       @esearch.retstart += RET_MAX
       
-      buf = datalist.last.create_detail
-      p buf
-      puts '--------'
+      datalist.each{|d|
+        res = self.structure_from_detail(d)
+        
+        record = Record.new(:pubmed_id => res[:pubmed_id], :title => res[:title], :author => res[:auther], :publish => res[:publish])
+        record.save
+        
+        #puts res
+        #puts '++++++++++++'
+      }
+
+      #puts '--------'
       
     end
     
@@ -47,8 +73,8 @@ class PubmedCrawler
   
 end
 
-#test = PubmedCrawler.new
-#test.keyword = 'cancer'
+test = PubmedCrawler.new
+test.keyword = 'cancer'
 
-#res = test.crawl
+res = test.crawl
 #puts res
