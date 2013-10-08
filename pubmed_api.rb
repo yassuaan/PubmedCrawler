@@ -58,11 +58,13 @@ class PubmedCrawler
       datalist.each{|d|
         res = self.structure_from_detail(d)
         
-        record = Record.new(:pubmed_id => res[:pubmed_id], :title => res[:title], :author => res[:auther], :publish => res[:publish])
-        record.save
+        record = Record.find_first_by_auth_conditions(res[:pubmed_id]) || Record.create_with_record(res)
         
-        #puts res
-        #puts '++++++++++++'
+        #record = Record.new(:pubmed_id => res[:pubmed_id], :title => res[:title], :author => res[:author], :publish => res[:publish])
+        #record.save
+        
+        puts record
+        puts '++++++++++++'
       }
 
       #puts '--------'
@@ -74,7 +76,7 @@ class PubmedCrawler
 end
 
 test = PubmedCrawler.new
-test.keyword = 'cancer'
+test.keyword = 'apotosis'
 
 res = test.crawl
 #puts res
