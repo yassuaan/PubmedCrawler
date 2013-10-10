@@ -1,0 +1,7 @@
+create table Records(
+id integer primary key,
+pubmed_id string,
+author string,
+title string,
+publish string
+);

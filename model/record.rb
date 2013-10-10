@@ -2,8 +2,11 @@ require "rubygems"
 require "active_record"
 
 # DB接続設定
-ActiveRecord::Base.establish_connection :adapter => "sqlite3",
-                                        :database => "pubmedcrawler"
+#ActiveRecord::Base.establish_connection :adapter => "sqlite3",
+#                                        :database => "pubmedcrawler"
+config = YAML.load_file('./database.yml')
+ActiveRecord::Base.establish_connection(config["db"]["development"])
+
 
 # テーブルにアクセスするためのクラスを宣言
 class Record < ActiveRecord::Base
